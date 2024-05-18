@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>會員頁面</title>
+        <link rel="stylesheet" type='text/css' href="{{url_for('static_week7',path='style.css')}}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            
+        </style>
+    </head>
+    <body >
+        <div class="title">
+            <h1>歡迎光臨，這是會員頁</h1>
+        </div>
+        <div class="form">
+            <form id="logoutForm" class="member-notify" action="signout" method="get">
+                <div class="logout-message"><span>{{username}}</span>，歡迎登入系統</div>
+                <div ><button class="btn-link" type="submit">登出系統</button></div>
+            </form>
+        </div>    
+        <hr class="line">
+        <div class="form">
+            <form id='send-message'class="form-inner" action="/createMessage" method="post">
+                <h3>快來留言吧！</h3> 
+                <div class="inner-box">內容<input type="text" name="content" id='createmessage' placeholder="your message"></div>
+                <div class="btn"><button type="submit" >送出</button></div>
+            </form>  
+        </div>
+        <hr class="line">
+        <div class="message">
+            <div class="message-block">
+                {% for message in messages %}
+                    <div ><strong>{{message.sender_name}}</strong>: {{message.content}}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- here add mysql message table's message and name-->
+    </body>
+    
+    
+</html>
