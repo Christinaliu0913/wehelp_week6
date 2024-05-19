@@ -114,21 +114,14 @@ async def signin_post(req: Request, username: str = Form(default=""), password: 
 @app.post("/createMessage")
 async def createMessage_post(req: Request, content: str=Form(default='')):
     session = req.session
+    user_id = session.get(USER_ID) #從會話中獲取userid
     if not content:
         return RedirectResponse(url='/member',status_code=303)
-    username = session.get('username')
-    user_id = session.get(USER_ID)
     try:
-        con = mysql.connector.connect(**db_config)
-        cursor = con.cursor()
-        cursor.execute('select id from member where username=%s',(username,))
-        member_id = cursor.fetchone()
-        print(member_id)
-        if member_id:
-            member_id = member_id[0]
-            cursor.fetchall()
-            cursor.execute('insert into message(member_id, content) value(%s,%s)',(member_id, content))
-            con.commit()
+        con=mysql.connector.connect(**db_config)
+        cursor=con.cursor()
+        cursor.execute('insert into message(member_id, content) value(%s,%s)',(user_id, content))
+        con.commit()
         return RedirectResponse(url='/member',status_code=303)
     finally:
         cursor.close()
