@@ -26,15 +26,21 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
 ###登出登入問題
 # 定義用戶狀態的鍵
+# 用戶id
 USER_STATE_KEY = "SIGNED-IN"
+USER_ID = 'user_id'
+
 #登入時
-def user_logged_in(req:Request,username:str):
+def user_logged_in(req:Request,user_id:str,username:str):
     req.session[USER_STATE_KEY]=True
+    req.session[USER_ID]=user_id
     req.session['username']=username
 
 #登出時
 def user_logger_out(req:Request):
     req.session.pop(USER_STATE_KEY,None)
+    req.session.pop(USER_ID,None)
+    req.session.pop('username',None)
 
 
 
@@ -94,11 +100,11 @@ async def signin_post(req: Request, username: str = Form(default=""), password: 
     try:
         if not username or not password:
             return RedirectResponse(url="/", status_code=303)
-        cursor.execute("select username from member where username=%s and password=%s",(username, password))
+        cursor.execute("select id,username from member where username=%s and password=%s",(username, password))
         member = cursor.fetchone()
         if member is None:
             return RedirectResponse(url='/error?message=你的帳號或密碼不正確',status_code=303)
-        user_logged_in(req,username)
+        user_logged_in(req,member[0],member[1])#改為儲存id, username
         return RedirectResponse(url='/member',status_code=303)
     finally:    
         cursor.close()
@@ -111,6 +117,7 @@ async def createMessage_post(req: Request, content: str=Form(default='')):
     if not content:
         return RedirectResponse(url='/member',status_code=303)
     username = session.get('username')
+    user_id = session.get(USER_ID)
     try:
         con = mysql.connector.connect(**db_config)
         cursor = con.cursor()
